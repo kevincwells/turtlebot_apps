@@ -1,4 +1,5 @@
 <launch>
+  <arg name="custom_gmapping_launch_file" default="$(find turtlebot_navigation)/launch/includes/gmapping/gmapping.launch.xml"/>
   <include file="$(find turtlebot_bringup)/launch/3dsensor.launch">
     <arg name="rgb_processing" value="false" />
     <arg name="depth_registration" value="false" />
@@ -9,7 +10,7 @@
     <arg name="scan_topic" value="/scan" />
   </include>
 
-  <include file="$(find turtlebot_navigation)/launch/includes/gmapping.launch.xml"/>
+  <include file="$(arg custom_gmapping_launch_file)"/>
 
   <include file="$(find turtlebot_navigation)/launch/includes/move_base.launch.xml"/>
 
