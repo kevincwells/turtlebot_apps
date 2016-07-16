@@ -21,6 +21,51 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_executable(laser_footprint_filter src/laser_footprint_filter.cpp)
 target_link_libraries(laser_footprint_filter ${catkin_LIBRARIES})
 
+# Generate camera param files
+include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+macro(generateCameraParamFiles camera)		
+	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/launch/includes/amcl/${camera}_amcl.launch.xml)
+		add_custom_target(
+			${camera}_amcl_target ALL
+			# Generate the camera-specific amcl.launch.xml file
+			COMMAND ln -s amcl.launch.xml ${camera}_amcl.launch.xml
+			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/launch/includes/amcl/		
+		)
+	endif()
+	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/launch/includes/gmapping/${camera}_gmapping.launch.xml)
+		add_custom_target(
+			${camera}_gmapping_target ALL
+			# Generate the camera-specific gmapping.launch.xml file
+			COMMAND ln -s gmapping.launch.xml ${camera}_gmapping.launch.xml
+			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/launch/includes/gmapping/
+		)
+	endif()
+	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/param/${camera}_costmap_param.yaml)
+		add_custom_target(
+			${camera}_move_base_costmap_target ALL
+			# Generate the camera-specific move_base costmap params file
+			COMMAND ln -s dummy.yaml ${camera}_costmap_param.yaml
+			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/param/
+		)
+	endif()
+endmacro()
+# use file() to get list of all camera file names from turtlebot_bringup
+rosbuild_find_ros_package(turtlebot_bringup)
+file(GLOB camera_names RELATIVE "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/" "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/*.launch.xml")
+#message(STATUS "AMBER ${camera_names}")
+# foreach file name, use regex to strip out camera name, and add it to cameras list
+foreach(camera_name ${camera_names})
+	STRING(REGEX REPLACE ".launch.xml" "" tmp ${camera_name})
+	list(APPEND cameras ${tmp})
+endforeach()
+#message(STATUS "AMBER2 ${cameras}")
+foreach(camera ${cameras})
+	generateCameraParamFiles(${camera})
+endforeach()
+
+
+
+
 
 #############
 ## Install ##
