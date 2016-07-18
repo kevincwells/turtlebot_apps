@@ -23,27 +23,27 @@ target_link_libraries(laser_footprint_filter ${catkin_LIBRARIES})
 
 # Generate camera param files
 include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-macro(generateCameraParamFiles camera)		
+macro(generateCameraParamFiles camera)
+	# Generate the camera-specific amcl.launch.xml file	
 	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/launch/includes/amcl/${camera}_amcl.launch.xml)
 		add_custom_target(
 			${camera}_amcl_target ALL
-			# Generate the camera-specific amcl.launch.xml file
 			COMMAND ln -s amcl.launch.xml ${camera}_amcl.launch.xml
 			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/launch/includes/amcl/		
 		)
 	endif()
+	# Generate the camera-specific gmapping.launch.xml file
 	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/launch/includes/gmapping/${camera}_gmapping.launch.xml)
 		add_custom_target(
 			${camera}_gmapping_target ALL
-			# Generate the camera-specific gmapping.launch.xml file
 			COMMAND ln -s gmapping.launch.xml ${camera}_gmapping.launch.xml
 			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/launch/includes/gmapping/
 		)
 	endif()
+	# Generate the camera-specific move_base costmap params file
 	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/param/${camera}_costmap_params.yaml)
 		add_custom_target(
 			${camera}_move_base_costmap_target ALL
-			# Generate the camera-specific move_base costmap params file
 			COMMAND ln -s dummy.yaml ${camera}_costmap_params.yaml
 			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/param/
 		)
@@ -52,14 +52,11 @@ endmacro()
 # use file() to get list of all camera file names from turtlebot_bringup
 rosbuild_find_ros_package(turtlebot_bringup)
 file(GLOB camera_file_names RELATIVE "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/" "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/*.launch.xml")
-# foreach file name, use regex to strip out camera name, and add it to cameras list
+# foreach file name, use regex to strip out camera name, and generate the param files
 foreach(camera_file_name ${camera_file_names})
 	STRING(REGEX REPLACE ".launch.xml" "" camera_name ${camera_file_name})
 	generateCameraParamFiles(${camera_name})	
 endforeach()
-
-
-
 
 
 #############
