@@ -40,11 +40,11 @@ macro(generateCameraParamFiles camera)
 			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/launch/includes/gmapping/
 		)
 	endif()
-	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/param/${camera}_costmap_param.yaml)
+	if(NOT EXISTS ${PROJECT_SOURCE_DIR}/param/${camera}_costmap_params.yaml)
 		add_custom_target(
 			${camera}_move_base_costmap_target ALL
 			# Generate the camera-specific move_base costmap params file
-			COMMAND ln -s dummy.yaml ${camera}_costmap_param.yaml
+			COMMAND ln -s dummy.yaml ${camera}_costmap_params.yaml
 			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/param/
 		)
 	endif()
@@ -52,13 +52,11 @@ endmacro()
 # use file() to get list of all camera file names from turtlebot_bringup
 rosbuild_find_ros_package(turtlebot_bringup)
 file(GLOB camera_names RELATIVE "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/" "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/*.launch.xml")
-#message(STATUS "AMBER ${camera_names}")
 # foreach file name, use regex to strip out camera name, and add it to cameras list
 foreach(camera_name ${camera_names})
 	STRING(REGEX REPLACE ".launch.xml" "" tmp ${camera_name})
 	list(APPEND cameras ${tmp})
 endforeach()
-#message(STATUS "AMBER2 ${cameras}")
 foreach(camera ${cameras})
 	generateCameraParamFiles(${camera})
 endforeach()
