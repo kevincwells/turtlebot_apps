@@ -51,14 +51,11 @@ macro(generateCameraParamFiles camera)
 endmacro()
 # use file() to get list of all camera file names from turtlebot_bringup
 rosbuild_find_ros_package(turtlebot_bringup)
-file(GLOB camera_names RELATIVE "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/" "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/*.launch.xml")
+file(GLOB camera_file_names RELATIVE "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/" "${turtlebot_bringup_PACKAGE_PATH}/launch/includes/3dsensor/*.launch.xml")
 # foreach file name, use regex to strip out camera name, and add it to cameras list
-foreach(camera_name ${camera_names})
-	STRING(REGEX REPLACE ".launch.xml" "" tmp ${camera_name})
-	list(APPEND cameras ${tmp})
-endforeach()
-foreach(camera ${cameras})
-	generateCameraParamFiles(${camera})
+foreach(camera_file_name ${camera_file_names})
+	STRING(REGEX REPLACE ".launch.xml" "" camera_name ${camera_file_name})
+	generateCameraParamFiles(${camera_name})	
 endforeach()
 
 
